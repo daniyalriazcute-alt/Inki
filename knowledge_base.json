@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Web Application Security Roadmap",
+    "category": "Application Security",
+    "content": "Core capabilities include HTTP fundamentals, browser security, authentication, authorization, session management, input validation, access control, API security, OWASP methodology, secure coding concepts, threat modeling, testing methodology, vulnerability reporting and remediation communication."
+  },
+  {
+    "title": "SOC Analyst Foundations",
+    "category": "Cybersecurity",
+    "content": "Foundational SOC skills include networking, operating systems, log analysis, SIEM concepts, detection engineering, incident triage, alert investigation, basic scripting, threat intelligence and incident response."
+  },
+  {
+    "title": "GRC Foundations",
+    "category": "Governance Risk Compliance",
+    "content": "GRC work commonly includes risk assessment, policy development, control mapping, audit evidence, security frameworks, third-party risk, business continuity, compliance documentation and stakeholder communication."
+  },
+  {
+    "title": "Cloud Security Foundations",
+    "category": "Cloud Security",
+    "content": "Cloud security foundations include identity and access management, network controls, logging and monitoring, secrets management, secure storage, workload security, infrastructure-as-code concepts and shared responsibility."
+  },
+  {
+    "title": "Security Portfolio Evidence",
+    "category": "Career Development",
+    "content": "A strong cybersecurity portfolio can include sanitized vulnerability write-ups, lab reports, detection rules, threat models, secure architecture diagrams, automation scripts, policy samples and clearly documented projects. Do not publish sensitive client information."
+  },
+  {
+    "title": "Interview Preparation",
+    "category": "Career Development",
+    "content": "Security interviews may assess fundamentals, scenario analysis, communication, methodology and practical reasoning. Prepare concise examples, explain assumptions, describe evidence and avoid claiming experience you do not have."
+  },
+  {
+    "title": "Learning Plan Design",
+    "category": "Career Development",
+    "content": "Effective plans sequence foundations before advanced topics, combine learning with hands-on practice, create measurable weekly outcomes, and produce portfolio evidence. A 30/60/90-day structure can be used when appropriate."
+  },
+  {
+    "title": "Free Learning Strategy",
+    "category": "Learning Resources",
+    "content": "When a user requests free learning, prioritize official documentation, open educational materials, reputable free courses, standards, public labs and vendor documentation. Verify current availability when a resource is time-sensitive."
+  }
+]

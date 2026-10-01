@@ -18,8 +18,28 @@ from security import sanitize_output, validate_user_input
 
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
-AVATAR = ASSETS_DIR / "aura_avatar.svg"
-BACKGROUND = ASSETS_DIR / "abstract_blue_liquid.svg"
+
+
+def _first_existing(*paths: Path) -> Path:
+    """Return the first file that exists (assets/ folder or repo root)."""
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
+AVATAR = _first_existing(
+    ASSETS_DIR / "aura_avatar.jpg",
+    BASE_DIR / "aura_avatar.jpg",
+    ASSETS_DIR / "AI_Agent_Avatar.jpg",
+    BASE_DIR / "AI_Agent_Avatar.jpg",
+    ASSETS_DIR / "aura_avatar.svg",
+    BASE_DIR / "aura_avatar.svg",
+)
+BACKGROUND = _first_existing(
+    ASSETS_DIR / "abstract_blue_liquid.svg",
+    BASE_DIR / "abstract_blue_liquid.svg",
+)
 
 st.set_page_config(
     page_title="AuraAI — AI Career & Skills Navigator",
@@ -50,7 +70,12 @@ def _asset_data_uri(path: Path) -> str:
     """Return a safe data URI. Missing assets never crash the app."""
     if not path.exists():
         return ""
-    mime = "image/svg+xml" if path.suffix.lower() == ".svg" else "image/png"
+    mime = {
+        ".svg": "image/svg+xml",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+    }.get(path.suffix.lower(), "image/png")
     data = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{data}"
 
@@ -178,6 +203,32 @@ def inject_css() -> None:
             box-shadow: 0 8px 28px rgba(38,129,245,.22);
         }}
 
+        /* Navigation buttons (real Streamlit buttons: same tab, session kept) */
+        [class*="st-key-nav"] button {{
+            width: 100%;
+            min-height: 48px;
+            border-radius: 11px !important;
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            color: #eaf3ff !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            white-space: nowrap;
+            box-shadow: none !important;
+            transition: .2s ease;
+        }}
+        [class*="st-key-nav"] button:hover {{
+            background: rgba(52,129,232,.16) !important;
+            color: white !important;
+        }}
+        [class*="st-key-navactive_"] button {{ background: rgba(52,129,232,.48) !important; }}
+        [class*="st-key-navauth_"] button {{ border: 1px solid rgba(181,211,255,.65) !important; }}
+        [class*="st-key-navreg_"] button {{
+            background: linear-gradient(135deg,#2d83f4,#368cff) !important;
+            border: 1px solid #4499ff !important;
+            box-shadow: 0 8px 28px rgba(38,129,245,.22) !important;
+        }}
+
         /* Hero */
         .hero-wrap {{
             padding: 62px 0 38px;
@@ -219,7 +270,7 @@ def inject_css() -> None:
             font-size: 19px;
             line-height: 1.7;
         }}
-        .cta button {{
+        .st-key-enter_aura button {{
             margin-top: 20px;
             background: linear-gradient(135deg,#2d8df5,#3988f1) !important;
             border: 0 !important;
@@ -260,10 +311,14 @@ def inject_css() -> None:
         .aura-img {{
             position: relative;
             z-index: 2;
-            width: min(430px, 92%);
-            max-height: 500px;
-            object-fit: contain;
-            filter: drop-shadow(0 20px 42px rgba(0,0,0,.45));
+            width: 370px;
+            height: 370px;
+            max-width: 88%;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 20%;
+            border: 3px solid rgba(70,170,255,.55);
+            box-shadow: 0 20px 50px rgba(0,0,0,.45), 0 0 40px rgba(44,157,255,.25);
         }}
         .aura-bubble {{
             position: absolute;
@@ -345,6 +400,7 @@ def inject_css() -> None:
             .features {{ grid-template-columns: 1fr; }}
             .hero-title {{ font-size: 3rem; }}
             .aura-stage::before {{ width: 310px; height: 310px; }}
+            .aura-img {{ width: 270px; height: 270px; }}
             .aura-bubble {{ right: 0; }}
         }}
         </style>
@@ -392,23 +448,22 @@ def render_nav() -> None:
     nav = [(1, "Home"), (2, "About"), (3, "Contact")]
     for idx, label in nav:
         with cols[idx]:
-            active = " active" if st.session_state.page == label else ""
-            st.markdown(
-                f'<a class="site-nav{active}" href="?page={label}">{label}</a>',
-                unsafe_allow_html=True,
-            )
-    with cols[4]:
-        st.markdown('<a class="site-nav auth-link" href="?page=Login">Login</a>', unsafe_allow_html=True)
-    with cols[5]:
-        st.markdown('<a class="site-nav register-link" href="?page=Register">Register</a>', unsafe_allow_html=True)
+            prefix = "navactive" if st.session_state.page == label else "nav"
+            if st.button(label, key=f"{prefix}_{label}", use_container_width=True):
+                go(label)
 
-    # Consume the query-string navigation after Streamlit reruns.
-    page = st.query_params.get("page")
-    if page in {"Home", "About", "Contact", "Login", "Register"} and page != st.session_state.page:
-        st.session_state.page = page
-        if page != "Home":
-            st.session_state.chat_open = False
-        st.rerun()
+    if st.session_state.authenticated:
+        with cols[4]:
+            if st.button("Logout", key="navauth_Logout", use_container_width=True):
+                logout()
+    else:
+        with cols[4]:
+            if st.button("Login", key="navauth_Login", use_container_width=True):
+                go("Login")
+        with cols[5]:
+            if st.button("Register", key="navreg_Register", use_container_width=True):
+                go("Register")
+
 
 def home_page() -> None:
     if st.session_state.authenticated and st.session_state.chat_open:
@@ -432,15 +487,14 @@ def home_page() -> None:
             """,
             unsafe_allow_html=True,
         )
-        st.markdown('<div class="cta">', unsafe_allow_html=True)
         if st.button("💬  Enter Aura   →", key="enter_aura", type="primary"):
             if st.session_state.authenticated:
                 st.session_state.chat_open = True
-                st.rerun()
             else:
                 st.session_state.page = "Login"
-                st.rerun()
-        st.markdown('</div></div>', unsafe_allow_html=True)
+                st.session_state.login_notice = True
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with right:
         avatar = AVATAR_URI
@@ -480,6 +534,8 @@ def auth_page(register: bool) -> None:
         f'<div class="auth-card glass"><div class="page-title" style="margin-top:0">{title}</div><p class="small-muted">{subtitle}</p>',
         unsafe_allow_html=True,
     )
+    if st.session_state.pop("login_notice", False) and not register:
+        st.info("Please sign in to enter Aura.")
     if not firebase_available():
         st.warning("Firebase is not configured yet. Add your Firebase settings to Streamlit Secrets before using authentication.")
 
@@ -675,6 +731,9 @@ def contact_page() -> None:
     st.markdown('<div class="page-title">Contact</div>', unsafe_allow_html=True)
     st.markdown('<div class="glass"><b>Email</b><br><br>daniyalriazcute@gmail.com</div>', unsafe_allow_html=True)
 
+
+if "page" in st.query_params:
+    st.query_params.clear()
 
 inject_css()
 render_nav()

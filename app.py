@@ -153,7 +153,7 @@ def inject_css() -> None:
         .brand-sub {{ color: #a9bde0; font-size: 17px; }}
 
         /* Website navigation */
-        .site-nav {
+        .site-nav {{
             display: flex;
             align-items: center;
             justify-content: center;
@@ -168,15 +168,15 @@ def inject_css() -> None:
             font-weight: 600;
             transition: .2s ease;
             white-space: nowrap;
-        }
-        .site-nav:hover { background: rgba(52,129,232,.16); color: white !important; }
-        .site-nav.active { background: rgba(52,129,232,.48); }
-        .auth-link { border: 1px solid rgba(181,211,255,.65); }
-        .register-link {
+        }}
+        .site-nav:hover {{ background: rgba(52,129,232,.16); color: white !important; }}
+        .site-nav.active {{ background: rgba(52,129,232,.48); }}
+        .auth-link {{ border: 1px solid rgba(181,211,255,.65); }}
+        .register-link {{
             background: linear-gradient(135deg,#2d83f4,#368cff);
             border: 1px solid #4499ff;
             box-shadow: 0 8px 28px rgba(38,129,245,.22);
-        }
+        }}
 
         /* Hero */
         .hero-wrap {{
